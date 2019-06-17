@@ -7,16 +7,16 @@ import (
 )
 
 // BootFunc Boot函数的原型
-type BootFunc func(params interface{}) (dontRetry bool, err error)
+type BootFunc func(params interface{}) (needRetry bool, err error)
 
 // Bootstrap 调用入口，timeout和retry单位ms
 func Bootstrap(boot BootFunc, params interface{}, timeout int, interval int) (err error) {
 	until := time.Now().Add(time.Millisecond * time.Duration(timeout))
 	for time.Now().Before(until) {
-		dontRetry, err := boot(params)
+		needRetry, err := boot(params)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "BOOTERR: %v\n", err)
-			if dontRetry {
+			if !needRetry {
 				// no need to retry, break
 				break
 			}
