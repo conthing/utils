@@ -11,7 +11,7 @@ import (
 )
 
 // Log 全局的loggerclient
-var logger zerolog.Logger
+var Log zerolog.Logger
 
 // InitLoggerClient 初始化loggerclient
 func InitLoggerClient(logLevel string, logTarget string, serviceName string, isRemote bool) {
