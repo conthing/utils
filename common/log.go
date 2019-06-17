@@ -21,10 +21,8 @@ func InitLoggerClient(logLevel string, logTarget string, serviceName string, isR
 		file = os.Stderr
 	} else {
 		file, err := os.OpenFile(logTarget, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-		if err == nil {
-			log.Out = file
-		} else {
-			log.Info("Failed to log to file, using default stderr")
+		if err != nil {
+			fmt.Print("Failed to log to file, using default stderr")
 			file = os.Stderr
 		}
 	}
