@@ -16,7 +16,7 @@ type Logger struct {
 }
 
 // Log 全局的loggerclient
-var Log = Logger{ZeroLog: log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339}).Level(zerolog.DebugLevel).With().Caller().Logger()}
+var Log = Logger{ZeroLog: log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339}).Level(zerolog.DebugLevel).With().CallerWithSkipFrameCount(3).Logger()}
 
 func levelFromString(levelString string) zerolog.Level {
 	switch strings.ToUpper(levelString) {
@@ -72,9 +72,9 @@ func InitLogger(args ...interface{}) {
 	}
 	level := levelFromString(logLevel)
 	if serviceName != "" {
-		Log.ZeroLog = log.Output(zerolog.ConsoleWriter{Out: file, TimeFormat: time.RFC3339}).Level(level).With().Caller().Str("app", serviceName).Logger()
+		Log.ZeroLog = log.Output(zerolog.ConsoleWriter{Out: file, TimeFormat: time.RFC3339}).Level(level).With().CallerWithSkipFrameCount(3).Str("app", serviceName).Logger()
 	} else {
-		Log.ZeroLog = log.Output(zerolog.ConsoleWriter{Out: file, TimeFormat: time.RFC3339}).Level(level).With().Caller().Logger()
+		Log.ZeroLog = log.Output(zerolog.ConsoleWriter{Out: file, TimeFormat: time.RFC3339}).Level(level).With().CallerWithSkipFrameCount(3).Logger()
 	}
 	Log.Infof("Log level:%s. %s", level, out)
 }
