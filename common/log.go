@@ -49,6 +49,7 @@ func InitLogger(config *LoggerConfig) {
 	var err error
 	var out string
 
+	level := levelFromString(config.Level)
 	if config.File == "" {
 		file = os.Stderr
 		out = "Log to stderr"
@@ -61,12 +62,15 @@ func InitLogger(config *LoggerConfig) {
 			out = fmt.Sprintf("Log to file \"%s\"", config.File)
 		}
 	}
-	level := levelFromString(config.Level)
-	if config.Service != "" {
-		Log.ZeroLog = log.Output(zerolog.ConsoleWriter{Out: file, TimeFormat: time.RFC3339}).Level(level).With().CallerWithSkipFrameCount(3).Str("service", config.Service).Logger()
-	} else {
-		Log.ZeroLog = log.Output(zerolog.ConsoleWriter{Out: file, TimeFormat: time.RFC3339}).Level(level).With().CallerWithSkipFrameCount(3).Logger()
+	context := log.Output(zerolog.ConsoleWriter{Out: file, TimeFormat: time.RFC3339}).Level(level).With()
+	if !config.SkipCaller {
+		context = context.CallerWithSkipFrameCount(3)
 	}
+	if config.Service != "" {
+		context = context.Str("service", config.Service)
+	}
+	Log.ZeroLog = context.Logger()
+
 	Log.Infof("Log level:%s. %s", level, out)
 }
 
