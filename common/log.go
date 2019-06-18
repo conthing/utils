@@ -10,6 +10,14 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+// LoggerConfig 配置结构体定义
+type LoggerConfig struct {
+	Level      string
+	File       string
+	SkipCaller bool
+	Service    string
+}
+
 // Logger 结构体定义
 type Logger struct {
 	ZeroLog zerolog.Logger
@@ -31,48 +39,31 @@ func levelFromString(levelString string) zerolog.Level {
 	}
 }
 
-// InitLogger 初始化logger，可以不掉用此Init，Log会初始化成默认值，动态参数解析，第一个参数level，第二个参数target，第三个service name
-func InitLogger(args ...interface{}) {
-	//动态参数解析
-	var ok bool
-	var logLevel string
-	var logTarget string
-	var serviceName string
-	if len(args) <= 0 {
-		logLevel = "DEBUG"
-	} else if logLevel, ok = args[0].(string); !ok {
-		logLevel = "DEBUG"
-	}
-	if len(args) <= 1 {
-		logTarget = ""
-	} else if logTarget, ok = args[1].(string); !ok {
-		logTarget = ""
-	}
-	if len(args) <= 2 {
-		serviceName = ""
-	} else if serviceName, ok = args[2].(string); !ok {
-		serviceName = ""
+// InitLogger 初始化logger，可以不调用此Init，Log会初始化成默认值
+func InitLogger(config *LoggerConfig) {
+	if config == nil {
+		return
 	}
 
 	var file *os.File
 	var err error
 	var out string
 
-	if logTarget == "" {
+	if config.File == "" {
 		file = os.Stderr
 		out = "Log to stderr"
 	} else {
-		file, err = os.OpenFile(logTarget, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+		file, err = os.OpenFile(config.File, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 		if err != nil {
 			file = os.Stderr
-			out = fmt.Sprintf("Failed to log to file \"%s\", using stderr", logTarget)
+			out = fmt.Sprintf("Failed to log to file \"%s\", using stderr", config.File)
 		} else {
-			out = fmt.Sprintf("Log to file \"%s\"", logTarget)
+			out = fmt.Sprintf("Log to file \"%s\"", config.File)
 		}
 	}
-	level := levelFromString(logLevel)
-	if serviceName != "" {
-		Log.ZeroLog = log.Output(zerolog.ConsoleWriter{Out: file, TimeFormat: time.RFC3339}).Level(level).With().CallerWithSkipFrameCount(3).Str("app", serviceName).Logger()
+	level := levelFromString(config.Level)
+	if config.Service != "" {
+		Log.ZeroLog = log.Output(zerolog.ConsoleWriter{Out: file, TimeFormat: time.RFC3339}).Level(level).With().CallerWithSkipFrameCount(3).Str("service", config.Service).Logger()
 	} else {
 		Log.ZeroLog = log.Output(zerolog.ConsoleWriter{Out: file, TimeFormat: time.RFC3339}).Level(level).With().CallerWithSkipFrameCount(3).Logger()
 	}

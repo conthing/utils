@@ -7,7 +7,7 @@ import (
 )
 
 func TestLog1(t *testing.T) {
-	InitLogger()
+	InitLogger(&LoggerConfig{Level: "WARN"})
 
 	Log.Error("This is a ERROR")
 	Log.Warn("This is a WARNING")
