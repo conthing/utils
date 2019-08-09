@@ -13,10 +13,11 @@ type BootFunc func(params interface{}) (needRetry bool, err error)
 func Bootstrap(boot BootFunc, params interface{}, timeout int, interval int) (err error) {
 	until := time.Now().Add(time.Millisecond * time.Duration(timeout))
 	for time.Now().Before(until) {
-		needRetry, err := boot(params)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "BOOTERR: %v\n", err)
+		needRetry, e := boot(params)
+		if e != nil {
+			fmt.Fprintf(os.Stderr, "BOOTERR: %v\n", e)
 			if !needRetry {
+				err = e
 				// no need to retry, break
 				break
 			}
