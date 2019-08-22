@@ -1,5 +1,4 @@
 package common
-
 import (
 	"fmt"
 	"os"
@@ -50,19 +49,19 @@ func InitLogger(config *LoggerConfig) {
 	var out string
 
 	level := levelFromString(config.Level)
+	context := log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339}).Level(level).With()
 	if config.File == "" {
-		file = os.Stderr
 		out = "Log to stderr"
 	} else {
 		file, err = os.OpenFile(config.File, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 		if err != nil {
-			file = os.Stderr
 			out = fmt.Sprintf("Failed to log to file \"%s\", using stderr", config.File)
 		} else {
+			context = log.Output(zerolog.ConsoleWriter{Out: file, TimeFormat: time.RFC3339, NoColor: true}).Level(level).With()
 			out = fmt.Sprintf("Log to file \"%s\"", config.File)
 		}
 	}
-	context := log.Output(zerolog.ConsoleWriter{Out: file, TimeFormat: time.RFC3339}).Level(level).With()
+
 	if !config.SkipCaller {
 		context = context.CallerWithSkipFrameCount(3)
 	}
@@ -95,21 +94,22 @@ func (logger Logger) Debugf(format string, v ...interface{}) {
 }
 
 // Error string方式输出error日志
-func (logger Logger) Error(msg string) {
-	logger.ZeroLog.Error().Msg(msg)
+func (logger Logger) Error(v ...interface{}) {
+	logger.ZeroLog.Error().Msg(fmt.Sprint(v...))
 }
 
 // Warn string方式输出warn日志
-func (logger Logger) Warn(msg string) {
-	logger.ZeroLog.Warn().Msg(msg)
+func (logger Logger) Warn(v ...interface{}) {
+	logger.ZeroLog.Warn().Msg(fmt.Sprint(v...))
 }
 
 // Info string方式输出info日志
-func (logger Logger) Info(msg string) {
-	logger.ZeroLog.Info().Msg(msg)
+func (logger Logger) Info(v ...interface{}) {
+	logger.ZeroLog.Info().Msg(fmt.Sprint(v...))
 }
 
 // Debug string方式输出debug日志
-func (logger Logger) Debug(msg string) {
-	logger.ZeroLog.Debug().Msg(msg)
+func (logger Logger) Debug(v ...interface{}) {
+	logger.ZeroLog.Debug().Msg(fmt.Sprint(v...))
 }
+
