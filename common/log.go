@@ -54,7 +54,7 @@ func InitLogger(config *LoggerConfig) {
 	if config.File == "" {
 		out = "Log to stderr"
 	} else {
-		file, err = os.OpenFile(config.File, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+		file, err = os.OpenFile(config.File, os.O_CREATE|os.O_WRONLY, 0666)
 		if err != nil {
 			out = fmt.Sprintf("Failed to log to file \"%s\", using stderr", config.File)
 		} else {
