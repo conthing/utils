@@ -1,4 +1,5 @@
 package common
+
 import (
 	"fmt"
 	"os"
@@ -23,7 +24,7 @@ type Logger struct {
 }
 
 // Log 全局的loggerclient
-var Log = Logger{ZeroLog: log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339}).Level(zerolog.DebugLevel).With().CallerWithSkipFrameCount(3).Logger()}
+var Log = Logger{ZeroLog: log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.StampMilli}).Level(zerolog.DebugLevel).With().CallerWithSkipFrameCount(3).Logger()}
 
 func levelFromString(levelString string) zerolog.Level {
 	switch strings.ToUpper(levelString) {
@@ -49,7 +50,7 @@ func InitLogger(config *LoggerConfig) {
 	var out string
 
 	level := levelFromString(config.Level)
-	context := log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339}).Level(level).With()
+	context := log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.StampMilli}).Level(level).With()
 	if config.File == "" {
 		out = "Log to stderr"
 	} else {
@@ -57,7 +58,7 @@ func InitLogger(config *LoggerConfig) {
 		if err != nil {
 			out = fmt.Sprintf("Failed to log to file \"%s\", using stderr", config.File)
 		} else {
-			context = log.Output(zerolog.ConsoleWriter{Out: file, TimeFormat: time.RFC3339, NoColor: true}).Level(level).With()
+			context = log.Output(zerolog.ConsoleWriter{Out: file, TimeFormat: time.StampMilli, NoColor: true}).Level(level).With()
 			out = fmt.Sprintf("Log to file \"%s\"", config.File)
 		}
 	}
@@ -112,4 +113,3 @@ func (logger Logger) Info(v ...interface{}) {
 func (logger Logger) Debug(v ...interface{}) {
 	logger.ZeroLog.Debug().Msg(fmt.Sprint(v...))
 }
-
