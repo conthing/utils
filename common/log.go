@@ -14,6 +14,7 @@ import (
 type LoggerConfig struct {
 	Level      string
 	File       string
+	AppendFile bool
 	SkipCaller bool
 	Service    string
 }
@@ -54,7 +55,12 @@ func InitLogger(config *LoggerConfig) {
 	if config.File == "" {
 		out = "Log to stderr"
 	} else {
-		file, err = os.OpenFile(config.File, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
+		if config.AppendFile {
+			file, err = os.OpenFile(config.File, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+		} else {
+			file, err = os.OpenFile(config.File, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
+		}
+		
 		if err != nil {
 			out = fmt.Sprintf("Failed to log to file \"%s\", using stderr", config.File)
 		} else {
