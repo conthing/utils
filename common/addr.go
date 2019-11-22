@@ -15,6 +15,22 @@ func GetMacAddrByName(name string) (macAddr string) {
 	return netInterface.HardwareAddr.String()
 }
 
+func GetSerialNumber() string {
+	netInterface, err := net.InterfaceByName("eth0")
+	if err != nil {
+		netInterface, err = net.InterfaceByName("eth1")
+		if err != nil {
+			netInterface, err = net.InterfaceByName("en0")
+			if err != nil {
+				log.Fatal("无法获取mac地址")
+			}
+		}
+	}
+
+	sn := fmt.Sprintf("%x", []byte(netInterface.HardwareAddr))
+	return sn
+}
+
 func GetMacHexStringByName(name string) (macAddr string) {
 	netInterface, err := net.InterfaceByName(name)
 	if err != nil {
