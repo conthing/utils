@@ -8,7 +8,7 @@ import (
 func GetMacAddrByName(name string) (macAddr string) {
 	netInterface, err := net.InterfaceByName(name)
 	if err != nil {
-		fmt.Printf("fail to get net interface by name %s: %v", name, err)
+		Log.Errorf("fail to get net interface by name %s: %v", name, err)
 		return
 	}
 
@@ -22,7 +22,7 @@ func GetSerialNumber() string {
 		if err != nil {
 			netInterface, err = net.InterfaceByName("en0")
 			if err != nil {
-				log.Fatal("无法获取mac地址")
+				Log.Errorf("can not get MAC of eth0/eth1")
 			}
 		}
 	}
@@ -34,7 +34,7 @@ func GetSerialNumber() string {
 func GetMacHexStringByName(name string) (macAddr string) {
 	netInterface, err := net.InterfaceByName(name)
 	if err != nil {
-		fmt.Printf("fail to get net interface by name %s: %v", name, err)
+		Log.Errorf("fail to get net interface by name %s: %v", name, err)
 		return
 	}
 
@@ -44,7 +44,7 @@ func GetMacHexStringByName(name string) (macAddr string) {
 func GetMacAddrs() (macAddrs []string) {
 	netInterfaces, err := net.Interfaces()
 	if err != nil {
-		fmt.Printf("fail to get net interfaces: %v", err)
+		Log.Errorf("fail to get net interfaces: %v", err)
 		return macAddrs
 	}
 
@@ -63,7 +63,7 @@ func GetIPs() (ips []string) {
 
 	interfaceAddr, err := net.InterfaceAddrs()
 	if err != nil {
-		fmt.Printf("fail to get net interface addrs: %v", err)
+		Log.Errorf("fail to get net interface addrs: %v", err)
 		return ips
 	}
 
