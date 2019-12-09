@@ -8,7 +8,7 @@ import (
 var ethName string
 var serialNumber string
 
-func init() {
+func Init() {
 	netInterface, err := net.InterfaceByName("eth0")
 	if err != nil || netInterface.HardwareAddr.String() == "08:00:3e:26:0a:5b" { //有些板子eth0能获取出这个地址
 		netInterface, err = net.InterfaceByName("eth1")
@@ -27,14 +27,14 @@ func init() {
 
 func GetMajorInterface() string {
 	if ethName == "" {
-		init()
+		Init()
 	}
 	return ethName
 }
 
 func GetSerialNumber() string {
 	if serialNumber == "" {
-		init()
+		Init()
 	}
 	return serialNumber
 }
