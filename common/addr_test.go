@@ -1,13 +1,30 @@
 package common
 
 import (
+	"log"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetMacAddrs1(t *testing.T) {
-	assert.Equal(t, "1", GetMacAddrs(), "Bootstrap should return error")
-	assert.Equal(t, "1", GetIPs(), "Bootstrap should return error")
-	assert.Equal(t, GetMacHexStringByName("本地连接"), GetMacAddrByName("本地连接"), "Bootstrap should return error")
+func TestGetMajorInterface(t *testing.T) {
+	i := GetMajorInterface()
+	log.Println(i)
+	assert.NotEqual(t, nil, i, "failed to get major interface")
+}
+
+func TestGetSerialNumber(t *testing.T) {
+	sn := GetSerialNumber()
+	log.Println(sn)
+	assert.NotEqual(t, nil, sn, "failed to get sn")
+}
+
+func TestSetMajorInterface(t *testing.T) {
+	SetMajorInterface("无线网络连接")
+	sn1 := GetSerialNumber()
+	log.Println(sn1)
+	SetMajorInterface("本地连接")
+	sn2 := GetSerialNumber()
+	log.Println(sn2)
+	assert.NotEqual(t, sn1, sn2, "SetMajorInterface failed")
 }
