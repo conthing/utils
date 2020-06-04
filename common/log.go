@@ -16,6 +16,7 @@ type LoggerConfig struct {
 	File       string
 	AppendFile bool
 	SkipCaller bool
+	Colorized  bool //输出到文件时，此设置无效
 	Service    string
 }
 
@@ -25,7 +26,7 @@ type Logger struct {
 }
 
 // Log 全局的loggerclient
-var Log = Logger{ZeroLog: log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.StampMilli}).Level(zerolog.DebugLevel).With().CallerWithSkipFrameCount(3).Logger()}
+var Log = Logger{ZeroLog: log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.StampMilli, NoColor: true}).Level(zerolog.DebugLevel).With().CallerWithSkipFrameCount(3).Logger()}
 
 func levelFromString(levelString string) zerolog.Level {
 	switch strings.ToUpper(levelString) {
@@ -51,7 +52,7 @@ func InitLogger(config *LoggerConfig) {
 	var out string
 
 	level := levelFromString(config.Level)
-	context := log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.StampMilli}).Level(level).With()
+	context := log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.StampMilli, NoColor: !config.Colorized}).Level(level).With()
 	if config.File == "" {
 		out = "Log to stderr"
 	} else {
@@ -60,7 +61,7 @@ func InitLogger(config *LoggerConfig) {
 		} else {
 			file, err = os.OpenFile(config.File, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
 		}
-		
+
 		if err != nil {
 			out = fmt.Sprintf("Failed to log to file \"%s\", using stderr", config.File)
 		} else {
