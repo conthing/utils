@@ -10,7 +10,7 @@ var serialNumber string
 
 // Init 依据既定的顺序查询网卡是否存在（不需要Up），如果存在就作为 MajorInterface ，即将其MAC作为设备序列号
 func Init() {
-	ethNameList := []string{"eth0", "eth1", "wlan0", "本地连接", "无线网络连接", "en0"}
+	ethNameList := []string{"eth0", "eth1", "wlan0", "本地连接", "无线网络连接", "en0", "WLAN"}
 
 	for _, name := range ethNameList {
 		netInterface, err := net.InterfaceByName(name)
