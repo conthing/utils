@@ -1,0 +1,11 @@
+# 2.0 configuration
+locktype: "careyesmodbus"
+cameratype: "eparking"
+plateidtype: ""
+ledtype: "extendled"
+http:
+  port: 52032
+redis:
+  host: "127.0.0.1"
+  port: 6379
+

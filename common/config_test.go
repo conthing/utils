@@ -1,27 +1,39 @@
 package common
 
 import (
+	"log"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestLoadConfig1(t *testing.T) {
-	InitLogger(&LoggerConfig{Level: "WARN", SkipCaller: true})
+// Config 配置文件基本组成
+type Config struct {
+	LockType    string
+	CameraType  string
+	PlateIDType string // CameraType 自带识别功能时，PlateIDType = ""
+	LedType     string
+	HTTP        HTTP
+	Redis       Redis
+}
 
-	Log.Error("This is a ERROR")
-	Log.Warn("This is a WARNING")
-	Log.Info("This is a INFO")
-	Log.Debug("This is a DEBUG")
-	Log.Errorf("This is a ERROR, %02x", 123)
-	Log.Warnf("This is a WARNING, %d", 456)
-	Log.Infof("This is a INFO, %s", "String")
-	Log.Debugf("This is a DEBUG, %v", Log)
+// Redis 配置
+type Redis struct {
+	Host string //sqlite3时，表示存储文件的路径和文件名
+	Port int
+}
 
+// HTTP 配置
+type HTTP struct {
+	Port int
+}
+
+var config Config
+
+func TestLoadYaml(t *testing.T) {
+	LoadYaml("", &config)
+
+	log.Printf("config:%+v", config)
 	// assert equality
-	assert.Equal(t, 123, 123, "they should be equal")
-
-	// assert inequality
-	assert.NotEqual(t, 123, 456, "they should not be equal")
-
+	assert.Equal(t, 52032, config.HTTP.Port, "they should be equal")
 }
