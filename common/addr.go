@@ -5,17 +5,17 @@ import (
 	"net"
 )
 
-var ethName string
+var mainInterface string
 var serialNumber string
 
-// Init 依据既定的顺序查询网卡是否存在（不需要Up），如果存在就作为 MajorInterface ，即将其MAC作为设备序列号
-func Init() {
-	ethNameList := []string{"eth0", "eth1", "wlan0", "本地连接", "无线网络连接", "en0", "WLAN"}
+// 依据既定的顺序查询网卡是否存在（不需要Up），如果存在就作为 MajorInterface ，即将其MAC作为设备序列号
+func autoSelectMainInterface() {
+	ethNameList := []string{"eth0", "eth1", "wlan0", "本地连接", "无线网络连接", "en0", "WLAN", "enp0s3", "enp0s8"}
 
 	for _, name := range ethNameList {
 		netInterface, err := net.InterfaceByName(name)
 		if err == nil {
-			ethName = name
+			mainInterface = name
 			serialNumber = fmt.Sprintf("%x", []byte(netInterface.HardwareAddr))
 			return
 		}
@@ -27,7 +27,7 @@ func Init() {
 func SetMajorInterface(name string) error {
 	netInterface, err := net.InterfaceByName(name)
 	if err == nil {
-		ethName = name
+		mainInterface = name
 		serialNumber = fmt.Sprintf("%x", []byte(netInterface.HardwareAddr))
 		return nil
 	}
@@ -36,18 +36,50 @@ func SetMajorInterface(name string) error {
 
 // GetMajorInterface 读取 MajorInterface ，如果原来没设置过，会调用Init
 func GetMajorInterface() string {
-	if ethName == "" {
-		Init()
+	if mainInterface == "" {
+		autoSelectMainInterface()
 	}
-	return ethName
+	return mainInterface
 }
 
 // GetSerialNumber 读取 SerialNumber ，如果原来没设置过，会调用Init
 func GetSerialNumber() string {
 	if serialNumber == "" {
-		Init()
+		autoSelectMainInterface()
 	}
 	return serialNumber
+}
+
+func GetMainInterfaceIP() string {
+	if mainInterface == "" {
+		autoSelectMainInterface()
+	}
+	ips := GetIPAddrByName(mainInterface)
+	return ips[0]
+}
+
+func GetIPAddrByName(name string) (ips []string) {
+	i, err := net.InterfaceByName(name)
+	if err != nil {
+		Log.Errorf("fail to get net interface by name %s: %v", name, err)
+		return
+	}
+	// handle err
+	addrs, err := i.Addrs()
+	if err != nil {
+		Log.Errorf("fail to get address from net interface %s: %v", name, err)
+		return
+	}
+
+	for _, address := range addrs {
+		ipNet, isValidIpNet := address.(*net.IPNet)
+		if isValidIpNet && !ipNet.IP.IsLoopback() {
+			if ipNet.IP.To4() != nil {
+				ips = append(ips, ipNet.IP.String())
+			}
+		}
+	}
+	return ips
 }
 
 // GetMacAddrByName 根据网口名称查询MAC地址
