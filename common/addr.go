@@ -5,17 +5,17 @@ import (
 	"net"
 )
 
-var mainInterface string
+var majorInterface string
 var serialNumber string
 
 // 依据既定的顺序查询网卡是否存在（不需要Up），如果存在就作为 MajorInterface ，即将其MAC作为设备序列号
-func autoSelectMainInterface() {
+func autoSelectMajorInterface() {
 	ethNameList := []string{"eth0", "eth1", "wlan0", "本地连接", "无线网络连接", "en0", "WLAN", "enp0s3", "enp0s8"}
 
 	for _, name := range ethNameList {
 		netInterface, err := net.InterfaceByName(name)
 		if err == nil {
-			mainInterface = name
+			majorInterface = name
 			serialNumber = fmt.Sprintf("%x", []byte(netInterface.HardwareAddr))
 			return
 		}
@@ -27,7 +27,7 @@ func autoSelectMainInterface() {
 func SetMajorInterface(name string) error {
 	netInterface, err := net.InterfaceByName(name)
 	if err == nil {
-		mainInterface = name
+		majorInterface = name
 		serialNumber = fmt.Sprintf("%x", []byte(netInterface.HardwareAddr))
 		return nil
 	}
@@ -36,25 +36,25 @@ func SetMajorInterface(name string) error {
 
 // GetMajorInterface 读取 MajorInterface ，如果原来没设置过，会调用Init
 func GetMajorInterface() string {
-	if mainInterface == "" {
-		autoSelectMainInterface()
+	if majorInterface == "" {
+		autoSelectMajorInterface()
 	}
-	return mainInterface
+	return majorInterface
 }
 
 // GetSerialNumber 读取 SerialNumber ，如果原来没设置过，会调用Init
 func GetSerialNumber() string {
 	if serialNumber == "" {
-		autoSelectMainInterface()
+		autoSelectMajorInterface()
 	}
 	return serialNumber
 }
 
-func GetMainInterfaceIP() string {
-	if mainInterface == "" {
-		autoSelectMainInterface()
+func GetMajorInterfaceIP() string {
+	if majorInterface == "" {
+		autoSelectMajorInterface()
 	}
-	ips := GetIPAddrByName(mainInterface)
+	ips := GetIPAddrByName(majorInterface)
 	return ips[0]
 }
 

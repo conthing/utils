@@ -19,9 +19,9 @@ func TestGetSerialNumber(t *testing.T) {
 	assert.NotEqual(t, nil, sn, "failed to get sn")
 }
 
-func TestGetMainInterfaceIP(t *testing.T) {
+func TestGetMajorInterfaceIP(t *testing.T) {
 	SetMajorInterface("无线网络连接")
-	ip := GetMainInterfaceIP()
+	ip := GetMajorInterfaceIP()
 	log.Println(ip)
 	assert.NotEqual(t, nil, ip, "failed to get ip")
 }
