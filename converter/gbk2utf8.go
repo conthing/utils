@@ -2,26 +2,14 @@ package converter
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"golang.org/x/text/transform"
 )
 
-//Gb18030ToUtf8 GB18030 to UTF-8
-func Gb18030ToUtf8(s string) (string, error) {
-	reader := transform.NewReader(bytes.NewReader([]byte(s)), simplifiedchinese.GB18030.NewDecoder())
-	d, err := ioutil.ReadAll(reader)
-	if err != nil {
-		return s, err
-	}
-	return string(d), nil
-}
-
-//GBK编码格式判断
-
-func isGBK(data []byte) bool {
+// ValidGBK GBK编码格式判断，是GB18030的子集，在2字节区间和UTF8有部分重叠
+func ValidGBK(data []byte) bool {
 	length := len(data)
 	var i int = 0
 	for i < length {
@@ -46,82 +34,22 @@ func isGBK(data []byte) bool {
 	return true
 }
 
-//UTF-8编码格式的判断
-
-func preNUm(data byte) int {
-	var mask byte = 0x80
-	var num int = 0
-	//8bit中首个0bit前有多少个1bits
-	for i := 0; i < 8; i++ {
-		if (data & mask) == mask {
-			num++
-			mask = mask >> 1
-		} else {
-			break
-		}
+// UTF8toGB18030 UTF8 to GB18030
+func UTF8toGB18030(src []byte) ([]byte, error) {
+	reader := transform.NewReader(bytes.NewReader(src), simplifiedchinese.GB18030.NewEncoder())
+	d, err := ioutil.ReadAll(reader)
+	if err != nil {
+		return src, err
 	}
-	return num
-}
-func isUtf8(data []byte) bool {
-	i := 0
-	for i < len(data) {
-		if (data[i] & 0x80) == 0x00 {
-			// 0XXX_XXXX
-			i++
-			continue
-		} else if num := preNUm(data[i]); num > 2 {
-			// 110X_XXXX 10XX_XXXX
-			// 1110_XXXX 10XX_XXXX 10XX_XXXX
-			// 1111_0XXX 10XX_XXXX 10XX_XXXX 10XX_XXXX
-			// 1111_10XX 10XX_XXXX 10XX_XXXX 10XX_XXXX 10XX_XXXX
-			// 1111_110X 10XX_XXXX 10XX_XXXX 10XX_XXXX 10XX_XXXX 10XX_XXXX
-			// preNUm() 返回首个字节的8个bits中首个0bit前面1bit的个数，该数量也是该字符所使用的字节数
-			i++
-			for j := 0; j < num-1; j++ {
-				//判断后面的 num - 1 个字节是不是都是10开头
-				if (data[i] & 0xc0) != 0x80 {
-					return false
-				}
-				i++
-			}
-		} else {
-			//其他情况说明不是utf-8
-			return false
-		}
-	}
-	return true
+	return d, nil
 }
 
-const (
-	GBK     string = "GBK"
-	UTF8    string = "UTF8"
-	UNKNOWN string = "UNKNOWN"
-)
-
-//需要说明的是，isGBK()是通过双字节是否落在gbk的编码范围内实现的，
-//而utf-8编码格式的每个字节都是落在gbk的编码范围内，
-//所以只有先调用isUtf8()先判断不是utf-8编码，再调用isGBK()才有意义
-func GetStrCoding(data []byte) string {
-	if isUtf8(data) {
-		return UTF8
-	} else if isGBK(data) {
-		return GBK
-	} else {
-		return UNKNOWN
+// GB18030toUTF8 GB18030 to UTF8
+func GB18030toUTF8(src []byte) ([]byte, error) {
+	reader := transform.NewReader(bytes.NewReader(src), simplifiedchinese.GB18030.NewDecoder())
+	d, err := ioutil.ReadAll(reader)
+	if err != nil {
+		return src, err
 	}
-}
-
-func ConvertToUtf8(data []byte) (string, error) {
-	if isUtf8(data) {
-		return string(data), nil
-	} else if isGBK(data) {
-		reader := transform.NewReader(bytes.NewReader(data), simplifiedchinese.GB18030.NewDecoder())
-		d, err := ioutil.ReadAll(reader)
-		if err != nil {
-			return string(data), err
-		}
-		return string(d), nil
-	} else {
-		return string(data), fmt.Errorf("Unknown codec")
-	}
+	return d, nil
 }
