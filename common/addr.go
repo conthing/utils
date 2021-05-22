@@ -54,7 +54,10 @@ func GetMajorInterfaceIP() string {
 	if majorInterface == "" {
 		autoSelectMajorInterface()
 	}
-	ips := GetIPAddrByName(majorInterface)
+	ips := GetIPAddrByName(majorInterface) // 有可能因为 DHCP过程中 或其他原因，找不到IP
+	if len(ips) <= 0 {                     // 出错返回空字符串
+		return ""
+	}
 	return ips[0]
 }
 
